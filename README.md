@@ -1,1 +1,93 @@
-This mini project provide a comprehensive guide on organizing shell scripts using functions to automate the setup of EC2 instances and S3 buckets for DataWise Solutions. The tutorial begins by explaining the importance of functions for clarity and efficiency, demonstrating how to encapsulate logic such as checking script arguments, verifying AWS CLI installation, and validating AWS authentication environment variables. It details the syntax for defining functions, including descriptive naming and proper placement within the script. Examples illustrate refactoring code into functions like `check_num_of_args` and `activate_infra_environment`, emphasizing readability and logical flow. The guide also covers AWS profile configuration, highlighting the use of `~/.aws/credentials` and `~/.aws/config` files for managing different environments (e.g., testing, production). Key commands like `command -v` for dependency checks and `-z` for variable validation are explained. By the end, the script is structured with functions called sequentially, ensuring modularity and ease of maintenance. This approach aligns with real-world practices, making the script robust and adaptable for automating AWS infrastructure tasks.
+## Functions in Shell Scripting
+
+Organizing code using functions improves clarity and efficiency. Functions encapsulate specific logic, such as:
+
+    Checking script arguments
+
+        Example: check_num_of_args() validates if the script received the correct number of arguments.
+
+        Syntax:
+``` bash
+
+    check_num_of_args() {
+      if [ "$#" -ne 1 ]; then
+        echo "Usage: $0 <environment>"
+        exit 1
+      fi
+    }
+```
+Verifying AWS CLI installation
+
+    Example: check_aws_cli() uses command -v aws to check if AWS CLI is installed.
+
+    Redirects output to /dev/null to suppress errors.
+
+    Syntax:
+``` bash
+
+    check_aws_cli() {
+      if ! command -v aws &>/dev/null; then
+        echo "AWS CLI not installed. Please install it."
+        return 1
+      fi
+    }
+```
+Validating AWS authentication
+
+    Example: check_aws_profile() checks if $AWS_PROFILE is set.
+
+    Uses -z to test for empty variables.
+
+    Syntax:
+``` bash
+
+    check_aws_profile() {
+      if [ -z "$AWS_PROFILE" ]; then
+        echo "AWS_PROFILE environment variable not set."
+        return 1
+      fi
+    }
+``` 
+Environment-based logic
+
+    Example: activate_infra_environment() executes commands based on the argument (local, testing, or production).
+
+    Syntax:
+``` bash
+
+        activate_infra_environment() {
+          case "$ENVIRONMENT" in
+            local)    echo "Running for Local Environment..." ;;
+            testing)  echo "Running for Testing Environment..." ;;
+            production) echo "Running for Production Environment..." ;;
+            *) echo "Invalid environment. Use 'local', 'testing', or 'production'."; exit 2 ;;
+          esac
+        }
+```
+AWS Configuration Files
+
+    ~/.aws/credentials: Stores AWS keys (e.g., aws_access_key_id, aws_secret_access_key) for different profiles (e.g., default, testing, production).
+
+    ~/.aws/config: Defines regions and output formats for profiles.
+
+Script Structure
+
+    Define environment variables (e.g., ENVIRONMENT=$1).
+
+    Declare functions (e.g., check_num_of_args, check_aws_cli).
+
+    Call functions in sequence at the end of the script.
+
+Key Notes
+
+    Functions are inactive until called.
+
+    Use return 1 for error conditions.
+
+    Redirect output (&>/dev/null) to silence commands.
+
+    Always validate inputs and dependencies.
+
+Summary
+
+The guide demonstrates modular shell scripting for AWS automation, emphasizing function usage for argument checks, dependency validation, and environment-specific actions. It highlights AWS configuration files (credentials and config) and advocates a structured approach—defining variables, functions, and function calls—to ensure maintainability.
